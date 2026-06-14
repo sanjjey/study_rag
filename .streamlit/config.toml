@@ -8,4 +8,4 @@ textColor       = "#f8fafc"
 [server]
 headless        = true
 enableCORS      = false
-folderWatchBlacklist = ["venv", "*.egg-info", "__pycache__"]
+fileWatcherType = "none"
