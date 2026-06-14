@@ -49,11 +49,13 @@ SUBJECTS = [
 # ── Cached singletons (loaded once per process, reused across reruns) ─────────
 @st.cache_resource(show_spinner="Loading AI models… (first run only, ~30s)")
 def load_services():
+    pipeline = IngestionPipeline()
+    retrieval = RetrievalEngine()
     return {
-        "pipeline": IngestionPipeline(),
-        "retrieval": RetrievalEngine(),
+        "pipeline": pipeline,
+        "retrieval": retrieval,
         "llm": LLMManager(),
-        "store": VectorStore(),
+        "store": pipeline.vector_store,   # reuse, don't create a third instance
     }
 
 # ── Optional single-password gate ─────────────────────────────────────────────
