@@ -9,6 +9,7 @@ from qdrant_client.models import (
     Filter,
     FilterSelector,
     MatchValue,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -40,6 +41,15 @@ class VectorStore:
                 vectors_config=VectorParams(size=_VECTOR_DIM, distance=Distance.COSINE),
             )
             logger.info(f"Created Qdrant collection '{self.collection_name}'")
+
+        # Payload indexes are required for any field used in filters.
+        # create_payload_index is idempotent — safe to call on every startup.
+        for field in ("book_name", "subject", "user_id", "original_filename"):
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name=field,
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
 
     def _sanitize(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
         return {
