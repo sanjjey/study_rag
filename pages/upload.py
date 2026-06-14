@@ -1,6 +1,8 @@
 import os
+import sys
 import tempfile
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import streamlit as st
 from services import load_services, get_subjects

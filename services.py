@@ -19,13 +19,15 @@ try:
 except Exception:
     pass
 
-from backend.ingestion.pipeline import IngestionPipeline
-from backend.retrieval.engine import RetrievalEngine
-from backend.api.llm_manager import LLMManager
 
 # ── Cached services ───────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="Loading AI models… (first run only, ~30s)")
 def load_services():
+    # Lazy imports — only load heavy backend when services are first requested
+    from backend.ingestion.pipeline import IngestionPipeline
+    from backend.retrieval.engine import RetrievalEngine
+    from backend.api.llm_manager import LLMManager
+
     pipeline = IngestionPipeline()
     retrieval = RetrievalEngine()
     return {
@@ -38,7 +40,6 @@ def load_services():
 
 # ── Subject helpers ───────────────────────────────────────────────────────────
 def get_subjects() -> list:
-    """Return sorted unique subject names derived from uploaded documents."""
     try:
         stats = load_services()["store"].get_stats()
         return sorted(s for s in stats.get("subjects", []) if s)
