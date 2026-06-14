@@ -12,7 +12,16 @@ _root = os.path.dirname(os.path.abspath(__file__))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
+# Load local .env (dev); on Streamlit Cloud secrets come via st.secrets instead
 load_dotenv(os.path.join(_root, "backend", ".env"))
+
+# Merge Streamlit Cloud secrets into os.environ so backend modules can use os.getenv()
+try:
+    for _k, _v in st.secrets.items():
+        if isinstance(_v, str):
+            os.environ.setdefault(_k, _v)
+except Exception:
+    pass
 
 # ── Page config (must be first Streamlit call) ────────────────────────────────
 st.set_page_config(
