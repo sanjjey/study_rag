@@ -1,1 +1,1 @@
-web: gunicorn -w 1 -k uvicorn.workers.UvicornWorker backend.main:app --bind 0.0.0.0:$PORT --timeout 120
+web: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true

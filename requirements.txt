@@ -1,1 +1,14 @@
--r backend/requirements.txt
+streamlit>=1.30.0
+python-dotenv
+qdrant-client
+langchain
+langchain-community
+langchain-groq
+langchain-text-splitters
+langchain-huggingface
+sentence-transformers
+pymupdf
+python-pptx
+python-docx
+pydantic-settings
+loguru

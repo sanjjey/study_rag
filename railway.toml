@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pip install -r backend/requirements.txt"
+buildCommand = "pip install -r requirements.txt"
 
 [deploy]
-startCommand = "gunicorn -w 1 -k uvicorn.workers.UvicornWorker backend.main:app --bind 0.0.0.0:$PORT --timeout 120"
-healthcheckPath = "/health"
-healthcheckTimeout = 30
+startCommand = "streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true"
+healthcheckPath = "/"
+healthcheckTimeout = 60
 restartPolicyType = "on_failure"
