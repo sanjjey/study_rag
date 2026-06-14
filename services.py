@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -22,7 +23,7 @@ from backend.ingestion.pipeline import IngestionPipeline
 from backend.retrieval.engine import RetrievalEngine
 from backend.api.llm_manager import LLMManager
 
-
+# ── Cached services ───────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner="Loading AI models… (first run only, ~30s)")
 def load_services():
     pipeline = IngestionPipeline()
@@ -35,8 +36,45 @@ def load_services():
     }
 
 
-SUBJECTS = [
-    "General", "Mathematics", "Physics", "Chemistry",
-    "Biology", "Computer Science", "History",
-    "Literature", "Economics", "Other",
-]
+# ── Subject helpers ───────────────────────────────────────────────────────────
+def get_subjects() -> list:
+    """Return sorted unique subject names derived from uploaded documents."""
+    try:
+        stats = load_services()["store"].get_stats()
+        return sorted(s for s in stats.get("subjects", []) if s)
+    except Exception:
+        return []
+
+
+# ── Chat persistence ──────────────────────────────────────────────────────────
+_CHAT_DIR = Path.home() / ".academicos"
+_CHAT_DIR.mkdir(exist_ok=True)
+
+
+def _chat_path(name: str) -> Path:
+    return _CHAT_DIR / f"{name}.json"
+
+
+def load_chat(name: str) -> list:
+    p = _chat_path(name)
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+    return []
+
+
+def save_chat(name: str, messages: list):
+    try:
+        _chat_path(name).write_text(
+            json.dumps(messages, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+    except Exception:
+        pass
+
+
+def delete_chat(name: str):
+    p = _chat_path(name)
+    if p.exists():
+        p.unlink()

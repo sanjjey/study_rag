@@ -1,14 +1,19 @@
 import re
 import streamlit as st
-from services import load_services, SUBJECTS
+from services import load_services, get_subjects
 
 svc = load_services()
 
 st.title("📝 Mock Test")
 
+subjects = get_subjects()
+if not subjects:
+    st.info("No documents uploaded yet. Go to **📤 Upload** to add study materials first.")
+    st.stop()
+
 with st.form("test_config"):
     c1, c2, c3, c4 = st.columns(4)
-    t_subject = c1.selectbox("Subject",        SUBJECTS)
+    t_subject = c1.selectbox("Subject",        ["All"] + subjects)
     t_diff    = c2.selectbox("Difficulty",     ["Easy", "Medium", "Hard", "Mixed"])
     t_types   = c3.selectbox("Question Types", ["Short Answer, MCQ", "MCQ", "Short Answer", "True/False", "Essay"])
     t_num     = c4.slider("Questions", 1, 15, 5)
@@ -16,7 +21,7 @@ with st.form("test_config"):
 
 if generate:
     with st.spinner("Generating test from your documents…"):
-        filters = {"subject": t_subject} if t_subject != "General" else None
+        filters = {"subject": t_subject} if t_subject != "All" else None
         ctx = svc["retrieval"].retrieve(
             query=f"Key concepts in {t_subject}", filters=filters, top_k=20, rerank_k=10
         )
@@ -53,8 +58,8 @@ if st.session_state.get("mock_test"):
             st.warning("Write your answers before submitting.")
         else:
             with st.spinner("Grading…"):
-                subj = st.session_state.get("mock_subject", "General")
-                filters = {"subject": subj} if subj != "General" else None
+                subj = st.session_state.get("mock_subject", "All")
+                filters = {"subject": subj} if subj != "All" else None
                 ctx = svc["retrieval"].retrieve(
                     query=f"concepts in {subj}", filters=filters, top_k=10, rerank_k=5
                 )
